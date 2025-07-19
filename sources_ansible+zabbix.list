@@ -1,0 +1,4 @@
+deb [trusted=yes] http://192.168.1.19/repo/repository-main/ 1.7_x86-64 main contrib non-free
+deb [trusted=yes] http://192.168.1.19/repo/repository-update/ 1.7_x86-64 main contrib non-free
+deb [trusted=yes] http://192.168.1.19/repo/repository-base/ 1.7_x86-64 main contrib non-free
+deb [trusted=yes] http://192.168.1.19/repo/repository-extended/ 1.7_x86-64 main contrib non-free
