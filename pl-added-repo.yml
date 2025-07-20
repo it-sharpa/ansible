@@ -1,0 +1,38 @@
+- name: add specified repository into sources list
+  hosts: astra
+  become: true
+  gather_facts: yes
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    repo_file: sources.list
+  tasks:
+    - name: added local repo
+      copy:
+        force: yes
+        src: ./{{ repo_file }}
+        dest: /etc/apt/{{ repo_file }}
+        owner: root
+        group: root
+        mode: '0644'
+      when:
+        - ansible_distribution.find('Astra Linux') != -1
+        - ansible_distribution_version.find('1.7_x86-64') != -1
+        - ansible_distribution_major_version.find('1.7_x86-64') != -1
+# if OS host not equal 'Astra Linux 1.7' > skipping next step playbook
+
+    - name: update apt cache
+      apt:
+        update_cache: yes
+    - name: apt search
+      shell: apt-get install -s fly-captive-portal-notifier
+      register: try_apt_search
+    - name: show search packet on local repo
+      debug:
+        msg: "{{try_apt_search.failed}}"
+#      apt_repository:
+#        repo:
+#          - deb [trusted=yes] http://192.168.1.19/repo/repository-main/ 1.7_x86-64 main contrib non-free
+#          - deb [trusted=yes] http://192.168.1.19/repo/repository-update/ 1.7_x86-64 main contrib non-free
+#          - deb [trusted=yes] http://192.168.1.19/repo/repository-base/ 1.7_x86-64 main contrib non-free
+#          - deb [trusted=yes] http://192.168.1.19/repo/repository-extended/ 1.7_x86-64 main contrib non-free  
+#        state: present

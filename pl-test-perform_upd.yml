@@ -1,0 +1,100 @@
+- name: "Checker ability host to correctly update packages Astra/Debian"
+  hosts: astra
+  become: yes
+  become_user: badmin
+  become_method: sudo
+  gather_facts: yes
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_facts_modules:
+#    path_packet: time-apt-dist-upgrade.sh
+#    tmp_path_packet: /tmp/time-apt-dist-upgrade.sh
+# check this port on hosts
+#    port: 22, 25, 123, 445
+# check available free space
+#    repo_address: 192.168.1.101 # actualized!
+#    check_dir: /, /var
+
+  tasks:
+#    - name: "Check free space (/, /var):"
+#    check_free_space:
+# попробовать проверять доступное пространство перед обновлением
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/mount_facts_module.html#ansible-collections-ansible-builtin-mount-facts-module
+#    - name: "Add repo:"
+#      ansible.builtin.apt_repository:  
+#      repo: # local repo
+#      state: present
+#    - name: "Check resolv.conf:"     
+#      shell: "cat /etc/resolv.conf"
+
+    - name: "Check dns:"
+      shell: "ping -c 1 ya.ru"
+      register: check_dns_fact 
+
+    - name: "Check dns result:"
+      when: check_dns_fact.stdout.find('icmp_seq') != -1
+      debug:
+        msg: "{{ check_dns_fact.stdout }}"
+
+# if run on Astra Linux (master host)
+#    - name: update apt cache
+#      apt:
+#        update_cache: yes
+
+    - name: Display free memory
+      debug:
+        msg: "Free Memory: {{ ansible_memfree_mb }} MB"
+
+    - name: Display available memory
+      debug:
+        msg: "Available memory: {{ hostvars[ansible_hostname].ansible_local.mem_available }} KB"
+
+    - name: "Apt update:"
+      shell: "sudo apt update"
+      register: apt_upd_fact
+      when: ansible_distribution.find('Astra Linux') != -1
+
+    - name: "Apt update result:"
+      debug:
+        msg: "{{ apt_upd_fact.stdout_lines }}"
+
+#    - name: "Create script apt update:"
+#      shell: time -p $(sudo apt-get -s dist-upgrade -y)
+#      args:
+#        executable: /bin/bash
+
+#    - name: "Copy script apt upgrade time:"
+#      copy: 
+#        src: "{{ path_packet }}"
+#        dest:
+#          with_items:
+#            - "{{ tmp_path_packet }}"
+#        owner: badmin
+#        group: badmin
+#        mode: 0500
+#    - name: "Predictable time update:"
+#      ansible.builtin.command:
+#        cmd: "{{ tmp_path_packet }}"
+
+#    - name: "Apt-get -s (check predictable time update):"
+# grep -e 'пакетов' -e warn -e fail -e err"
+#      ansible.builtin.shell: time -p $(sudo apt-get -s dist-upgrade -y) | grep real
+#      args:
+#        executable: /bin/bash
+#      register: time_update
+      
+#    - name: "Predictable time update:"
+#      debug:
+#        msg: "Host: {{ inventory_hostname }} time update = {{ time_update.stdout }}"
+
+# // Not right 'root' WTF?!
+#    - name: "Check available repo (usage shell):"
+#      shell: "sudo apt update"
+#
+#    - name: "Check available repo:"
+#      ansible.builtin.apt:
+#        update_cache: false
+#        lock_timeout: 10
+#        name: "*"
+#        force_apt_get: true
+#        state: latest

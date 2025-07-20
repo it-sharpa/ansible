@@ -1,0 +1,17 @@
+- name: "Checker ability host to correctly update packages Astra/Debian"
+  hosts: astra
+  become: true
+#  gather_facts: yes
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+  tasks:
+# for usage argument 'update_cache' must install package ansible-module-astra-update
+    - name: update apt cache
+      apt:
+        update_cache: yes
+    - name: apt search
+      shell: apt-get install -s fly-captive-portal-notifier
+      register: try_apt_search
+    - name: show search packet on local repo
+      debug:
+        msg: "{{try_apt_search.failed}}"
